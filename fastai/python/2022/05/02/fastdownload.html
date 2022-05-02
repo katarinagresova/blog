@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Downloading datasets in Python like a pro using fastai’s fastdownload | Katarina’s Blog</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Downloading datasets in Python like a pro using fastai’s fastdownload" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="fastai and related projects are great resources but they might lack documentation, examples, and tips from the community. Therefore this is my small addition to fastai community." />
+<meta property="og:description" content="fastai and related projects are great resources but they might lack documentation, examples, and tips from the community. Therefore this is my small addition to fastai community." />
+<link rel="canonical" href="https://katarinagresova.github.io/blog/fastai/python/2022/05/02/fastdownload.html" />
+<meta property="og:url" content="https://katarinagresova.github.io/blog/fastai/python/2022/05/02/fastdownload.html" />
+<meta property="og:site_name" content="Katarina’s Blog" />
+<meta property="og:image" content="https://katarinagresova.github.io/blog/images/mac-minimal.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2022-05-02T00:00:00-05:00" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://katarinagresova.github.io/blog/images/mac-minimal.jpg" />
+<meta property="twitter:title" content="Downloading datasets in Python like a pro using fastai’s fastdownload" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2022-05-02T00:00:00-05:00","datePublished":"2022-05-02T00:00:00-05:00","description":"fastai and related projects are great resources but they might lack documentation, examples, and tips from the community. Therefore this is my small addition to fastai community.","headline":"Downloading datasets in Python like a pro using fastai’s fastdownload","image":"https://katarinagresova.github.io/blog/images/mac-minimal.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://katarinagresova.github.io/blog/fastai/python/2022/05/02/fastdownload.html"},"url":"https://katarinagresova.github.io/blog/fastai/python/2022/05/02/fastdownload.html"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/blog/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://katarinagresova.github.io/blog/feed.xml" title="Katarina's Blog" /><link rel="shortcut icon" type="image/x-icon" href="/blog/images/favicon.png"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" /><script src="https://hypothes.is/embed.js" async></script>
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/blog/">Katarina&#39;s Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/blog/about/">About me</a><a class="page-link" href="/blog/search/">Search</a><a class="page-link" href="/blog/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Downloading datasets in Python like a pro using fastai&#39;s fastdownload</h1><p class="page-description">fastai and related projects are great resources but they might lack documentation, examples, and tips from the community. Therefore this is my small addition to fastai community.</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2022-05-02T00:00:00-05:00" itemprop="datePublished">
+        May 2, 2022
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      7 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/blog/categories/#fastai">fastai</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/blog/categories/#python">python</a>
+        
+      
+      </p>
+    
+
+    
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul id="toc" class="section-nav">
+<li class="toc-entry toc-h2"><a href="#Introduction">Introduction </a></li>
+<li class="toc-entry toc-h2"><a href="#Basic-example">Basic example </a></li>
+<li class="toc-entry toc-h2"><a href="#Parametrization">Parametrization </a></li>
+<li class="toc-entry toc-h2"><a href="#Enhancement-1:-Working-with-a-compressed-files">Enhancement 1: Working with a compressed files </a></li>
+<li class="toc-entry toc-h2"><a href="#Enhancement-2:-Adding-support-for-new-compression-formats">Enhancement 2: Adding support for new compression formats </a></li>
+<li class="toc-entry toc-h2"><a href="#Conclusion">Conclusion </a></li>
+<li class="toc-entry toc-h2"><a href="#Resources">Resources </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2022-05-02-fastdownload.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><img src="/blog/images/copied_from_nb/my_icons/mac-minimal.jpg" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Introduction">
+<a class="anchor" href="#Introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction<a class="anchor-link" href="#Introduction"> </a>
+</h2>
+<p>Being in a Deep Learning field, you most probably know Jeremy Howard and his <code>fastai</code> <a href="#resources">[1]</a> and projects related to it. One of these related projects is <code>fastdownload</code> <a href="#resources">[2]</a> that I found only recently (even tho it is out almost a year) and tried to use it. It was not without problems, but I found it useful and I decided to share my findings and enhancements.</p>
+<blockquote>
+<p>If you have datasets or other archives that you want to make available to your users and ensure they always have the latest versions and that they are downloaded correctly, <code>fastdownload</code> can help.</p>
+</blockquote>
+<p><code>fastdownload</code> can handle multiple URLs pointing at the same archive and ensure that users always get the latest version of the archive. Getting a dataset is as easy as calling the <code>FastDownload.get</code> method and passing the URL of the archive. The URL will be downloaded and extracted to the specified location and the path to the extracted file will be returned.</p>
+<p>For instance, <code>fastai</code> uses <code>fastdownload</code> to provide access to datasets for deep learning. <code>fastai</code> users can download and extract them with a single command, using the return value to access the files. The files are automatically placed in appropriate subdirectories of a <code>.fastai</code> folder in the user's home dir. If a dataset is updated, users are informed the next time they use the dataset, and the latest version is automatically downloaded and extracted for them.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Basic-example">
+<a class="anchor" href="#Basic-example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Basic example<a class="anchor-link" href="#Basic-example"> </a>
+</h2>
+<p>As described above, the most common usage for <code>fastdownload</code> is to download a dataset from the internet. Datasets are usually formatted as a bunch of files separated into directories based on the class of the data in a file. All of these class directories are then placed in a single dataset directory that is compressed. So usually we have an URL to the  compressed dataset and we want to do the following:</p>
+<ul>
+<li>check if we already have the dataset, if it is up to date and not corrupted,</li>
+<li>download the dataset, if needed,</li>
+<li>extract the dataset, if needed,</li>
+<li>have a path to the extracted dataset.</li>
+</ul>
+<p>With <code>fastdownload</code> we can do all of this in two lines (after installing a package and importing it).</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>pip uninstall -y -q fastdownload
+<span class="o">!</span>pip install -q fastdownload
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">fastdownload</span>
+<span class="kn">from</span> <span class="nn">fastdownload</span> <span class="kn">import</span> <span class="n">FastDownload</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">FastDownload</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="n">fastdownload</span><span class="p">)</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'https://s3.amazonaws.com/fast-ai-sample/mnist_tiny.tgz'</span><span class="p">)</span>
+<span class="n">path</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Path('/home/jovyan/.fastdownload/data/mnist_tiny')</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Download seems to be successful and we can also see that <code>path</code> is pointing to <code>mnist_tiny/</code> directory that is stored in <code>.fastdownload/data/</code> directory that is stored in my home directory.</p>
+<p>This is it, you now know how to download datasets in Python using <code>fastai</code>'s <code>fastdownload</code>. But if you are interested in more advanced usage, keep reading.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Parametrization">
+<a class="anchor" href="#Parametrization" aria-hidden="true"><span class="octicon octicon-link"></span></a>Parametrization<a class="anchor-link" href="#Parametrization"> </a>
+</h2>
+<p>In Basic example we pretty much used default parameters for <code>fastdownload</code> but we can also parametrize it. When creating a <code>FastDownload</code> object we can specify four parameters: <code>base</code>, <code>archive</code>, <code>data</code> and <code>module</code>. First three parameters are connected with location where files will be downloaded and extracted. <code>base</code> is a path to parent directory where it all will live in. Archives are then saved to <code>{base}/{archive}</code>, and extracted to <code>{base}/{data}</code>. When no values are specified, default values are as follows:</p>
+<ul>
+<li><code>base = ~/.fastdownload</code></li>
+<li><code>archive = archive</code></li>
+<li><code>data = data</code></li>
+</ul>
+<p>This is exactly matching with our <code>path</code> in Basic example.</p>
+<p>Last parameter is <code>module</code> that is useful when downloading datasets connected with some package. One part of downloading is a check if the dataset is not corrupted. To do so, we need to have access to true values of file size and hash. <code>fastdownload</code> is using file <code>download_checks.py</code> for this and it is expected to be located in the same directory as a module we specified using <code>module</code> parameter. Author of a package and datasets should provide this file.</p>
+<p>When we look back at the Basic example, we specified <code>module=fastdownload</code> which was pretty useless since <code>fastdownload</code> module contains no <code>download_checks.py</code> file. There is a small bug in the current distribution of <code>fastdownload</code> package that causes it to fail when <code>module</code> is not specified. Fix is already in <code>fastdownload</code>'s github but it is not released yet. Therefore we need to specify some <code>module</code> parameter for now even tho it is not really used.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Enhancement-1:-Working-with-a-compressed-files">
+<a class="anchor" href="#Enhancement-1:-Working-with-a-compressed-files" aria-hidden="true"><span class="octicon octicon-link"></span></a>Enhancement 1: Working with a compressed files<a class="anchor-link" href="#Enhancement-1:-Working-with-a-compressed-files"> </a>
+</h2>
+<p>Without doubts, <code>fastdownload</code> is a good tool for downloading datasets. However, I stumbled upon a problem when I tried to work with a compressed file (not a compressed directory). This problem might not be apparent at first because first downloading and unpacking of a compressed file is without a problem.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">path</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'https://silkdb.bioinfotoolkits.net/__resource/Bombyx_mori/download/cds.fa.tar.gz'</span><span class="p">)</span>
+<span class="n">path</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Path('/home/jovyan/.fastdownload/data/cds.fa')</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Problem shows when removing file with <code>d.rm(url)</code> or using <code>force=True</code> parameter in <code>d.get()</code> (which forces new download of file even it was downloaded before).</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'https://silkdb.bioinfotoolkits.net/__resource/Bombyx_mori/download/cds.fa.tar.gz'</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea ">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea ">
+
+    <div>
+      <progress value="5578752" class="" max="5577257" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.03% [5578752/5577257 00:03&lt;00:00]
+    </div>
+    
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[Errno 20] Not a directory: Path('/home/jovyan/.fastdownload/data/cds.fa')
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The file was downloaded but unpacking failed. More precisely, removing an old uncompressed file before unpacking a new one failed. <code>fastdownload</code> is expecting only directories as it is the most used format for datasets. I understand that downloading compressed files is not a primary use case for <code>fastdownload</code> but I would like to use it for it. Luckily, I was able to add support for compressed files into <code>fastdownload</code>. Enhancement lives in a fork of <code>fastdownload</code> on my github <a href="#resources">[3]</a> for now but I will try to get it into <code>fastdownload</code>. It can be easily installed as a python package using the <code>pip</code> command.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>pip uninstall -y -q fastdownload
+<span class="o">!</span>pip install -q git+https://github.com/katarinagresova/fastdownload
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we need to import the newly installed <code>fastdownload</code> module and create a <code>FastDownload</code> object again.
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>we don’t have to specify <code>module</code> parameter here since we are installing a version with a fix already in it. However, if you would download a dataset where <code>download_checks.py</code> file is created, you should specify a <code>module</code> where it is located.
+</div>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">fastdownload</span> <span class="kn">import</span> <span class="n">FastDownload</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">FastDownload</span><span class="p">()</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'https://silkdb.bioinfotoolkits.net/__resource/Bombyx_mori/download/cds.fa.tar.gz'</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">path</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea ">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea ">
+
+    <div>
+      <progress value="5578752" class="" max="5577257" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.03% [5578752/5577257 00:03&lt;00:00]
+    </div>
+    
+</div>
+
+</div>
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Path('/home/jovyan/.fastdownload/data/cds.fa')</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can also verify that our <code>path</code> is really pointing to the extracted file and not a directory.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">())</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>True
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Enhancement-2:-Adding-support-for-new-compression-formats">
+<a class="anchor" href="#Enhancement-2:-Adding-support-for-new-compression-formats" aria-hidden="true"><span class="octicon octicon-link"></span></a>Enhancement 2: Adding support for new compression formats<a class="anchor-link" href="#Enhancement-2:-Adding-support-for-new-compression-formats"> </a>
+</h2>
+<p>While trying to use <code>fastdownload</code> I found another use case that was not supported - downloading a compressed file with a <code>.gz</code> extension.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'http://ftp.ensembl.org/pub/release-106/mysql/regulation_mart_106/dmelanogaster_external_feature__external_feature__main.txt.gz'</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea ">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea ">
+
+    <div>
+      <progress value="5152768" class="" max="5152564" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [5152768/5152564 00:01&lt;00:00]
+    </div>
+    
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Unknown archive format '/home/jovyan/.fastdownload/archive/dmelanogaster_external_feature__external_feature__main.txt.gz'
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>I dug a little deeper into <code>fastdownload</code> and found that it uses <code>shutil</code> module <a href="#resources">[4]</a> for decompressing files. This module supports only some of compression formats and <code>.gz</code> is not one of them.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">shutil</span>
+
+<span class="n">shutil</span><span class="o">.</span><span class="n">get_archive_formats</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[('bztar', "bzip2'ed tar-file"),
+ ('gztar', "gzip'ed tar-file"),
+ ('tar', 'uncompressed tar file'),
+ ('xztar', "xz'ed tar-file"),
+ ('zip', 'ZIP file')]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>However, we can add support for a new compression format by creating a decompression function and registering it in <code>shutil</code>. There is a native support for this in <code>shutil</code>.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">shutil</span><span class="o">.</span><span class="n">register_archive_format</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Registers an archive format.
+
+    name is the name of the format. function is the callable that will be
+    used to create archives. If provided, extra_args is a sequence of
+    (name, value) tuples that will be passed as arguments to the callable.
+    description can be provided to describe the format, and will be returned
+    by the get_archive_formats() function.
+    
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Thanks to the smart people at <code>stackoverflow</code> I was able to figure out how to do it. I adapted the code from <code>stackoverflow</code> <a href="#resources">[5]</a> and I replaced problematic file name extraction with a <code>pathlib.Path</code> <a href="#resources">[6]</a>. We might register any compression format in this way.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+
+
+<span class="k">def</span> <span class="nf">gunzip_something</span><span class="p">(</span><span class="n">gzipped_file_name</span><span class="p">,</span> <span class="n">work_dir</span><span class="p">):</span>
+    <span class="sd">"""gunzip the given gzipped fil</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gzipped_file_name (str): path to the gzipped file</span>
+<span class="sd">        work_dir (str): path to the directory where the file will be unzipped</span>
+<span class="sd">    """</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">gzipped_file_name</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span>
+
+    <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">gzipped_file_name</span><span class="p">,</span> <span class="s1">'rb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_in</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="s1">'wb'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_out</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copyfileobj</span><span class="p">(</span><span class="n">f_in</span><span class="p">,</span> <span class="n">f_out</span><span class="p">)</span>
+
+
+<span class="n">shutil</span><span class="o">.</span><span class="n">register_unpack_format</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">'gz'</span><span class="p">,</span>
+    <span class="n">extensions</span><span class="o">=</span><span class="p">[</span><span class="s1">'.gz'</span><span class="p">],</span>
+    <span class="n">function</span><span class="o">=</span><span class="n">gunzip_something</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s1">'Gzipped file'</span>
+<span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>And now we can download also files with <code>.gz</code> extension.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">path</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'http://ftp.ensembl.org/pub/release-106/mysql/regulation_mart_106/dmelanogaster_external_feature__external_feature__main.txt.gz'</span><span class="p">)</span>
+<span class="n">path</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Path('/home/jovyan/.fastdownload/data/dmelanogaster_external_feature__external_feature__main.txt')</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Conclusion">
+<a class="anchor" href="#Conclusion" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conclusion<a class="anchor-link" href="#Conclusion"> </a>
+</h2>
+<p><code>fastdownload</code> is a quite useful tool for managing datasets. If you like to use it also for managing any type of compressed files, use <a href="https://github.com/katarinagresova/fastdownload">my extended version</a>. You can also use it for any compression type by registering a decompression function in <code>shutil</code> as described above.</p>
+<p>Fast downloading!</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Resources">
+<a class="anchor" href="#Resources" aria-hidden="true"><span class="octicon octicon-link"></span></a>Resources<a class="anchor-link" href="#Resources"> </a>
+</h2>
+<p>[1] <a href="https://www.fast.ai/">https://www.fast.ai/</a><br>
+[2] <a href="https://fastdownload.fast.ai/">https://fastdownload.fast.ai/</a><br>
+[3] <a href="https://github.com/katarinagresova">https://github.com/katarinagresova</a><br>
+[4] <a href="https://docs.python.org/3/library/shutil.html">https://docs.python.org/3/library/shutil.html</a><br>
+[5] <a href="https://stackoverflow.com/a/57923425">https://stackoverflow.com/a/57923425</a><br>
+[6] <a href="https://docs.python.org/3/library/pathlib.html">https://docs.python.org/3/library/pathlib.html</a></p>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="katarinagresova/blog"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/blog/fastai/python/2022/05/02/fastdownload.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/blog/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/blog/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/blog/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>I post stuff here.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/katarinagresova" target="_blank" title="katarinagresova"><svg class="svg-icon grey"><use xlink:href="/blog/assets/minima-social-icons.svg#github"></use></svg></a></li><li><a rel="me" href="https://twitter.com/katarinagresova" target="_blank" title="katarinagresova"><svg class="svg-icon grey"><use xlink:href="/blog/assets/minima-social-icons.svg#twitter"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
